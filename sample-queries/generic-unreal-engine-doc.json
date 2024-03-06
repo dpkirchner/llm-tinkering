@@ -1,0 +1,124 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "Your job is to perform these two tasks when presented with documentation for Unreal Engine 5. Do these tasks to completion without any assistance and respond with only the results. Use advanced analysis to perform these tasks.
+
+**Task 1**
+1. Read each paragraph of the documentation to understand its content and cross-references.
+2. Enhance the complexity of existing instruction sets based on the documentation. Make sure the instructions become more detailed.
+3. Write new responses for these evolved instructions that accurately reflect the added detail.
+
+**Task 2**
+
+1. Identify key points or questions that a reader might have about the documentation. Consider information that is not specific to Unreal Engine that the caller may need to understand the code.
+2. Convert these into a series of prompt conversations, formatting them as a dialogue between two actors: one asking questions and one providing answers.
+3. Use YAML format to structure these conversations, ensuring clarity and logical flow from question to answer, reflecting the documentation accurately.
+
+**Example of proper results:**
+
+**Task 1: Enhanced instruction set with responses**
+
+- Original Instruction: \"Summarize the documentation.\"
+- Evolved Instruction: \"Summarize the documentation, focusing on potential use cases and cross-references to other code.\"
+- Response: \"The documentation explains how to write Unreal Engine 5 code accurately and with few errors.\"
+
+**Task 2: Prompt conversations in YAML format**
+
+```yaml
+conversations:
+  - actor_1: \"What code does this documentation aim to explain?\"
+    actor_2: \"The code addresses how to use a particular class or object.\"
+  - actor_1: \"How does this documentation help developers?\"
+    actor_2: \"It briefly explains how to write game software.\"
+    actor_1: \"What types of algorithms does it use?\"
+    actor_2: \"...\"
+```
+
+Include at least 3 conversations.
+1 conversation must ask how to solve a complex problem in which there is a dialog that progressively discovers the answer to that problem through constructive collaboration.
+
+** Supporting information**
+
+1. **Understand the Initial Dataset or Text**: Before evolving instructions or creating prompt conversations, thoroughly understand the content, objectives, and structure of the research paper. This foundational knowledge will guide the enhancement and questioning process.
+
+2. **Incremental Complexity in Evolving Instructions**: When enhancing instructions (Task 1), aim for incremental complexity. This means adding detail or depth without making the task unapproachable. Focus on integrating specific elements from the research paper that highlight its contributions, implications, and areas for further investigation.
+
+3. **Accuracy and Relevance in Response Generation**: In generating responses for the evolved instructions, ensure they are directly relevant to the added complexities. Responses should not only summarize but also critically engage with the paper's content, reflecting an understanding of its significance.
+
+4. **Logical and Engaging Prompt Conversations (Task 2)**: When creating prompt conversations, each dialogue should flow logically, mimicking an inquisitive and informative exchange. Questions should derive naturally from the research paper's content, aiming to elucidate or explore its key points, methodologies, findings, and implications.
+
+5. **YAML Formatting for Clarity**: Structure prompt conversations in YAML format with clear, concise syntax. This includes properly using dashes and indentations to distinguish between the dialogue of `actor_1` and `actor_2`, ensuring the conversations are easy to follow and understand."
+    }, {
+      "role": "user",
+      "content": "Summarize this page of documentation. Generate relevant prompt pairs:  References
+
+Module 	
+
+Core
+
+Header 	
+
+/Engine/Source/Runtime/Core/Public/Math/TransformCalculus.h
+
+Include 	
+
+#include \"Math/TransformCalculus.h\"
+
+Syntax
+
+template<class TransformType>
+struct TransformConverter
+
+Remarks
+
+Transform calculus.
+
+A Transform represents a frame of reference in a local (often orthonormal) coordinate system. Essentially a transform represents conversion from a local space A to another local space B. Thus, it's commonly written as T[AB]. Keeping this notation of spaces explicit allows transformation calculus to be very simple and easily checked using something akin to dimensional analysis:
+
+T[AB] * T[BC] => TAC](API\Plugins\SoundCueTemplates\ESoundContainerType) T[AB]^-1 => TBA
+
+Concatenate is illegal if the LHS output space is not equivalent to the RHS input space:
+
+T[AB] * T[BC] < OK T[BA] * T[BC] < illegal; output space is A, input space is B.
+
+So, if you have a spatial hierarchy like so: A
+
+/     \
+
+        /
+       H
+
+You can easily construct the math to move from, say, Space D to Space H using notation purely in terms of the forward transforms that define the hierarchy:
+
+T[DH] = T[DB] * T[BA] * T[CA]-1 * T[GC]-1 * T[HG]^-1
+
+From a code standpoint, this gives us a well-defined set of methods that can be called on anything that can be interpreted as a transform and let it work uniformly. Matrices, Quats, Vectors, Scalars, and other custom classes that are unambiguously defined as transformational spaces can be concatenated together with a well-defined meaning. Fundamental Operations
+
+The fundamental components of the Transform library are a collection of non-member functions (and their overloads):
+
+    Concatenate(TransformA, TransformB)
+
+    Inverse(Transform)
+
+    TransformPoint(Transform, Point)
+
+    TransformVector(Transform, Vector)
+
+    TransformCast<Result, Transform> 
+
+These operations are NOT member functions to support existing classes in UE4 without modification, and to more easily support extending the supported types with other existing classes.
+
+Concatenate
+
+Generalized transform concatenation. It exists to ensure that any two classes that can be thought of as transformational spaces (listed above, along with any user-defined classes), can be combined uniformly with well defined semantics. For example, given A * B in UE4 means two different things if A and B are matrices or quaternions. Concatenate abstracts this notion into an explicit syntax for combining transforms instead of focusing on the mathematical notation.
+
+The result of a concatenate operation depends on the types concatenated, but are guaranteed to be another type that supports the fundamental operations. For instance, concatenating two translations results in another translation, but concatenating a rotation followed by a translation might result in a FMatrix, or potentially another class that efficiently contains this transformation (like maybe a class that holds a scalar+quat+vector).
+
+Generally you should not have to worry about the return type. Just Concatenate and then use another fundamental operation to transform a position and/or vector through that space. When you need to store the result you can either use auto, assume the type, or use TransformCast (covered below) to ensure the type.
+
+In certain rare cases, the result of Concatenate may be ambiguous (FRotator or FQuat?). In such cases, there is a Concatenate template overload that allows you to explicitly specify the ResultType. This should rarely be necessary.
+"
+    }
+  ]
+}

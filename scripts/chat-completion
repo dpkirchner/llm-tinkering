@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+	echo "no query specified" > /dev/stderr
+	echo "usage: $0 whatever you want to ask the bot, must be wrapped in quotes" > /dev/stderr
+	echo "example: $0 'Show me a hamburger recipe.'"
+	exit 1
+fi
+
+JSON=$(jq -n --arg user_content "$1" '{"messages": [{"role": "user", "content": $user_content}]}')
+
+curl -s http://localhost:3928/v1/chat/completions   -H "Content-Type: application/json"   -d "$JSON" | jq -r .

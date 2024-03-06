@@ -1,0 +1,9 @@
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Show me a recipe for a hamburger."
+    }
+  ],
+  "max_tokens": 2000
+}

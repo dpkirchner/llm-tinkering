@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+        echo "no model file specified" > /dev/stderr
+        echo "usage: $0 model.gguf" > /dev/stderr
+	echo "path is relative to the container, so use /models/whatever.gguf instead of ./models/whatever.gguf" > /dev/stderr
+        exit 1
+fi
+
+curl localhost:3928/inferences/llamacpp/loadmodel -H 'content-type: application/json' -d '{"llama_model_path":"'$1'","ctx_len":2048,"ngl":100}'

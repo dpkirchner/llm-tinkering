@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  axolotl_cli:
+    build:
+      context: .
+      dockerfile: axolotl/Dockerfile
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DISABLE_REQUIRE: 1
+    volumes:
+      - type: bind
+        source: ./models
+        target: /models
+      - type: bind
+        source: ./cache
+        target: /root/.cache
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 16G
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+    command: tail -f /dev/null
+
+  nitro_service:
+    build:
+      context: .
+      dockerfile: nitro/Dockerfile
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DISABLE_REQUIRE: 1
+    volumes:
+      - type: bind
+        source: ./models
+        target: /models
+    ports:
+      - "3928:3928"
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 16G
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
