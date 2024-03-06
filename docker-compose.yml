@@ -15,6 +15,9 @@ services:
       - type: bind
         source: ./cache
         target: /root/.cache
+      - type: bind
+        source: ./axolotl/configs
+        target: /configs
     deploy:
       resources:
         limits:
