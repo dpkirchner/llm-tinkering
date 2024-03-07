@@ -37,12 +37,20 @@ Then run: `./scripts/loadmodel /models/capybarahermes-2.5-mistral-7b.Q5_K_M.gguf
 
 (OK so this isn't useful.)
 
-TODO: Document using axolotl to finetune.
+Some axolotl notes on fine tuning that worked for me. I'll mention where each command needs to be run.
 
-Some axolotl notes on fine tuning that worked for me.
+> Models are saved in your `models` directory. This directory is mounted as `/models` inside containers. You'll see both paths used in these instructions.
 
-1) Preprocess a base model (openllama-3b for this, based on what you see in axolotl's official README). Run this in the axolotl docker container: `python3 -m axolotl.cli.preprocess /configs/example-openllama-3b-config.yml`. This doesn't take too long and writes to `/models/openllama-3b-dataset-prepared`.
-2) Fine tune the model using the same config: `accelerate launch -m axolotl.cli.train /configs/example-openllama-3b-config.yml`. This takes a long time.
-3) Convert the model to .gguf format (TODO Document this)
-4) Load the model into nitro
-5) Run chat-completion to test it.
+1. Preprocess a base model (openllama-3b for this, based on what you see in axolotl's official README). **In the axolotl container**: `python3 -m axolotl.cli.preprocess /configs/example-openllama-3b-config.yml`.
+  a. This doesn't take too long and writes to `models/openllama-3b-dataset-prepared`.
+2. Fine tune the model using the same config. **In the axolotl container**: `accelerate launch -m axolotl.cli.train /configs/example-openllama-3b-config.yml`.
+  a. This takes a long time, many hours, and writes to `models/openllama-3b-lora-out`.
+  b. Recommend execing into docker from inside tmux so the process continues (and you can reattach to it) if you disconnect.
+  c. You'll see a bunch of Python-y dumped objects describing your model's layers when this is done.
+3. Merge the models. **In the axolotl container**: `python3 -m axolotl.cli.merge_lora /configs/example-openllama-3b-config.yml --lora_model_dir=/models/openllama-3b-lora-out`
+  a. This is fast. It'll write to `models/openllama-3b-lora-out/merged`.
+4. Convert the model to .gguf format (necessary to use with nitro). **Run this in the VM, in the base directory of this repo**: `docker run --rm -v $(pwd)/models:/models convert-axolotl-to-gguf:latest /models/openllama-3b-lora-out/merged --outfile /models/openllama-3b-lora-out/merged.gguf --outtype q8_0`
+  a. Build the converter image (if you don't already have it): `cd convert-axolotl-to-gguf && docker build -t convert-axolotl-to-gguf .`
+  b. This is fast. Writes to `models/openllama-3b-lora-out/merged.gguf`
+5. Load the model into nitro. **Run this in the VM, in the base directory of this repo**: `./scripts/loadmodel /models/openllama-3b-lora-out/merged.gguf`
+6. Run chat-completion to test it. **Run this in the VM, in the base directory of this repo**: `./scripts/chat-completion "Hello world, how are you doing?"`
