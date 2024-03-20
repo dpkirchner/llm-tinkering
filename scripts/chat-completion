@@ -7,6 +7,6 @@ if [ -z "$1" ]; then
 	exit 1
 fi
 
-JSON=$(jq -n --arg user_content "$1" '{"messages": [{"role": "user", "content": $user_content}]}')
+JSON=$(jq -n --arg user_content "$1" '{"max_tokens": 4096, "messages": [{"role": "user", "content": $user_content}]}')
 
 curl -s http://localhost:3928/v1/chat/completions   -H "Content-Type: application/json"   -d "$JSON" | jq -r .

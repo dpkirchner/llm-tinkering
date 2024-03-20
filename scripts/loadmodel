@@ -7,4 +7,4 @@ if [ -z "$1" ]; then
         exit 1
 fi
 
-curl localhost:3928/inferences/llamacpp/loadmodel -H 'content-type: application/json' -d '{"llama_model_path":"'$1'","ctx_len":2048,"ngl":100}'
+curl localhost:3928/inferences/llamacpp/loadmodel -H 'content-type: application/json' -d '{"llama_model_path":"'$1'","ctx_len":4096,"ngl":100}'
