@@ -5,8 +5,9 @@ WORKDIR /app
 # Install required packages
 RUN apt-get update && \
     apt-get install -y git cmake numactl uuid-dev && \
-    git clone --recurse https://github.com/janhq/nitro nitro && \
+    git clone --recurse https://github.com/dpkirchner/nitro nitro && \
     cd nitro && \
+    git checkout fix-content-type && \
     ./install_deps.sh && \
     mkdir build && \
     cd build && \
